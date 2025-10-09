@@ -1,0 +1,22 @@
+# Definição global das redes
+networks:
+  sirrobot_intranet:
+    external: true # Indica que esta rede já existe e não deve ser criada.
+
+services:
+  cache-server-fastapi:
+    image: fastapi_celery_cache-server-fastapi
+    container_name: api-cache-server
+    hostname: api-cache-server
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - .:/app
+    ports: 
+      - 8009:8000
+    restart: always
+    networks:
+      sirrobot_intranet:
+        ipv4_address: 172.1.0.9

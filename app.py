@@ -77,6 +77,7 @@ def gravar_no_memcached(itens: ItensCache):
     # 3.2. Gravação no Memcached (Passo 4 do algoritmo)
     # mc.set(chave, valor, tempo_expiracao)
     sucesso = mc.set(itens.chave, valor_serializado, time=itens.expiracao)
+
     if sucesso:
         # 3.3. Retorno de Sucesso (Passo 5 do algoritmo)
         return {

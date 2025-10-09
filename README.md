@@ -121,8 +121,6 @@ let conectApi = async (url, obj) => {
 
 conectApi('http://clr0an001372366.nt.embratel.com.br:8004/host', bodyObj)
 ```
-
-
 #### Base de dados do arquivo .json
 ```json
 {
@@ -132,6 +130,7 @@ conectApi('http://clr0an001372366.nt.embratel.com.br:8004/host', bodyObj)
 }
 ```
 
+### VARIAVEL DE AMBIENTE
 ```.env
 MEMCACHED_SERVERS=cache-serve
 SERVER_PORT=11211

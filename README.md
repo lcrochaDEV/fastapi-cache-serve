@@ -71,6 +71,8 @@ Este projeto visa automatizar, busca e armazenamento de dados, ele é chamado po
 }
 ```
 
+#### Endpoint\GET http://localhost:8001/cache/recuperar/{chave}
+
 ### FRONT-END
 #### CABEÇALHO FETCH
 

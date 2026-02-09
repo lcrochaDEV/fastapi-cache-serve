@@ -42,6 +42,7 @@ deactivate
 #pip install python-dotenv
 #pip install fastapi
 #pip install "uvicorn[standard]" ou pip install "uvicorn[all]"
+#pip install pymemcache
 ```
 #### Iniciando o servidor Uvincorn
 ```shell
@@ -56,79 +57,21 @@ API Criada para criação e consulta de dados em cache(memcached)
 Este projeto visa automatizar, busca e armazenamento de dados, ele é chamado por métodos CRUD, onde os dados são armazeado em um servidor memcached e consumido.
 
 #### Endpoint\POST http://localhost:8001/cache/gravar
-```json
-{
-    "chave": "lucas",
-    "valor": {
-        "textarea": "TEXTO DO CAMPO TEXTAREA",
-        "tx":"RJO AM RJO AM DP*V 0001",
-        "elementoA": "RJMAD01-RMD01",
-        "intA": "1/1/1",
-        "elementoB": "RJMAD01-RMD02",
-        "intB": "1/1/2"
-    },
-    "expiracao": 300
-}
-```
+
 
 #### Endpoint\GET http://localhost:8001/cache/recuperar/{chave}
 
-### FRONT-END
-#### CABEÇALHO FETCH
-
 ```js
-let textarea = document.querySelector('.txtarea').value;
-let desigtx = regexpAberturaderal(/\w{1,}\s\w{1,}\s\w{1,}\s\w{1,}\s\w{2}\*\w\s\d{4}|\w{1,}\s\w{1,}\s\w{1,}\s\w{1,}\s\d+\w\s\d+/gm);
-let ipran = regexpAberturaderal(/IP\sRAN\/\w{2}\s\w+\/\w{2}\s\w+/gm);
-let ipnodeb = regexpAberturaderal(/IP\sNODEB\/\w{2}\s\w+\/\w{2}\s\w+/gm);
 
-let data = new Date();
-let datahora = `${data.toLocaleDateString()} - ${data.getHours()}:${data.getMinutes()}`;
-function regexpAberturaderal(patten){
-    let capturatxt =  [... textarea.matchAll(patten)];
-    if(capturatxt.length !== 0){
-        return capturatxt[0][0];
-    }
-}
-
-var myHeaders = new Headers({
-    'Content-Type': 'application/json',
-});
-
-let bodyObj = {
-    url: 'http://10.129.219.180/smart/modules/authentication',
-    elementoA: 'BACAB05',
-    elementoB: 'BACAB05'
-}
-
-let conectApi = async (url, obj) => {
-    var options = {
-      method: "POST",
-      body: JSON.stringify(obj),
-      headers: myHeaders,
-      mode: "cors",
-      cache: "default",
-    };
-
-    try{
-        const conexao = await fetch(url, options)
-        if(conexao.status === 200){
-            const openConexao = await conexao.json();
-            return openConexao;
-        } 
-    }catch(error){
-        console.log('Falha no link!')
-    }
-}
-
-conectApi('http://clr0an001372366.nt.embratel.com.br:8004/host', bodyObj)
 ```
 #### Base de dados do arquivo .json
 ```json
 {
-    "id": 1,
-    "sitecode": "",
-    "end": ""
+    "chave": "lucas",
+    "valor": {
+        "textarea": "TEXTO DO CAMPO TEXTAREA"
+    },
+    "expiracao": 300
 }
 ```
 

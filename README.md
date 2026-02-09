@@ -42,7 +42,7 @@ deactivate
 #pip install python-dotenv
 #pip install fastapi
 #pip install "uvicorn[standard]" ou pip install "uvicorn[all]"
-#pip install pymemcache
+#pip install python-memcached
 ```
 #### Iniciando o servidor Uvincorn
 ```shell

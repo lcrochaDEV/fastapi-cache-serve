@@ -125,3 +125,124 @@ def recuperar_do_memcached(chave: str):
         # 4. Cache Miss (Erro)
         # A chave não foi encontrada no cache.
         raise HTTPException(status_code=404, detail=f"Chave '{chave}' não encontrada no cache.")
+
+'''
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import memcache  # Importa a biblioteca cliente Memcached
+import json
+import logging
+from dotenv import load_dotenv
+import os
+import uuid  # <-- Adicionado para gerar o UUID
+
+load_dotenv()
+
+MEMCACHED_SERVERS = os.getenv("MEMCACHED_SERVERS")
+SERVER_PORT = os.getenv("SERVER_PORT")
+
+app = FastAPI()
+
+origins = [
+    "http://localhost",
+    "http://localhost:8000",
+    "*"
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["POST", "GET"],
+    allow_headers=["*"],
+    max_age=3600,
+)
+
+@app.get("/")
+def methodGet():
+   return {"API está operacional memcaced"}
+
+# Configuração
+MEMCACHED_SERVERS = [(f'{MEMCACHED_SERVERS}:{SERVER_PORT}')]
+logging.basicConfig(level=logging.INFO)
+
+# 1. Conexão Global com o Memcached
+try:
+    mc = memcache.Client(MEMCACHED_SERVERS, debug=0)
+    if not mc.set('test_key', '1'):
+         logging.warning("Não foi possível conectar ou gravar no Memcached. Verifique o servidor.")
+except Exception as e:
+    logging.error(f"Erro ao iniciar o cliente Memcached: {e}")
+    mc = None 
+
+# 2. Modelo Pydantic Modificado
+class ItensCache(BaseModel):
+    """Define o formato esperado para o corpo da requisição POST."""
+    # chave: str <-- Removido daqui pois será gerada no backend
+    valor: dict  # Aceita qualquer objeto JSON como valor
+    expiracao: int = 300  # Tempo em segundos 
+
+# 3. Path Operation (Endpoint POST Modificado)
+@app.post("/cache/gravar", status_code=201)
+def gravar_no_memcached(itens: ItensCache):
+    """
+    Recebe uma requisição POST, gera um UUID como chave e grava os dados no Memcached.
+    """
+    if mc is None:
+        logging.error("Cliente Memcached não está inicializado.")
+        raise HTTPException(status_code=503, detail="Serviço de Cache indisponível.")
+
+    # Geração automática da chave única (UUIDv4)
+    chave_uuid = str(uuid.uuid4())
+
+    # 3.1. Serialização do Valor
+    try:
+        valor_serializado = json.dumps(itens.valor)
+    except TypeError:
+        raise HTTPException(status_code=422, detail="Valor não é um objeto JSON válido.")
+
+    # 3.2. Gravação no Memcached usando o UUID gerado
+    sucesso = mc.set(chave_uuid, valor_serializado, time=itens.expiracao)
+
+    if sucesso:
+        # Busca o login dentro do dicionário enviado (ajuste a chave se seu payload usar outro nome)
+        login_usuario = itens.valor.get("user", "Não informado")
+
+        # 3.3. Retorno de Sucesso com o formato solicitado para a sessão/cookie
+        return {
+            "status": "sucesso", 
+            "uuid": chave_uuid,
+            "user": login_usuario,
+            "tempo_expiracao_segundos": itens.expiracao
+        }
+    else:
+        logging.error(f"Falha ao gravar chave {chave_uuid} no Memcached.")
+        raise HTTPException(status_code=500, detail="Falha ao armazenar dados no cache. Tente novamente.")
+
+# 4. Path Operation (Endpoint GET)
+@app.get("/cache/recuperar/{chave}")
+def recuperar_do_memcached(chave: str):
+    """
+    Recebe uma chave e tenta recuperar o valor associado do Memcached.
+    """
+    if mc is None:
+        raise HTTPException(status_code=503, detail="Serviço de Cache indisponível.")
+
+    valor_serializado = mc.get(chave)
+
+    if valor_serializado is not None:
+        try:
+            valor_objeto = json.loads(valor_serializado)
+            return {
+                "status": "sucesso",
+                "chave": chave,
+                "origem": "memcached",
+                "valor": valor_objeto
+            }
+        except json.JSONDecodeError:
+            logging.error(f"Erro de desserialização para a chave: {chave}")
+            raise HTTPException(status_code=500, detail="Dado corrompido no cache.")
+            
+    else:
+        raise HTTPException(status_code=404, detail=f"Chave '{chave}' não encontrada no cache.")
+'''
